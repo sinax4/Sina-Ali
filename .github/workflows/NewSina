@@ -1,0 +1,40 @@
+name: Send Name and Student Code
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Full Name'
+        required: true
+      student_code:
+        description: 'Student Code'
+        required: true
+
+jobs:
+  send-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Send data and save token
+        run: |
+          response=$(curl -G "https://shams.sython.ir/test.php" \
+            --data-urlencode "name=${{ github.event.inputs.name }}" \
+            --data-urlencode "student_code=${{ github.event.inputs.student_code }}")
+
+          echo "$response" > token.txt
+          echo "Token saved to token.txt"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Commit and push token.txt
+        run: |
+          git add token.txt
+          git commit -m "Add token.txt from workflow run" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
