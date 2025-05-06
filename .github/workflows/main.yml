@@ -1,0 +1,23 @@
+
+name: Send Name and Student Code
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Full Name'
+        required: true
+      student_code:
+        description: 'Student Code'
+        required: true
+
+jobs:
+  send-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send data to URL
+        run: |
+          curl -G "https://shams.sython.ir/test.php" \
+          --data-urlencode "name=${{ github.event.inputs.name }}" \
+          --data-urlencode "student_code=${{ github.event.inputs.student_code }}"
+          
